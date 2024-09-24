@@ -1,0 +1,15 @@
+services:
+
+  livekit:
+    image: sphinx-livekit
+    command: ["node", "server.js"]
+    restart: on-failure
+    container_name: livekit.sphinx
+    environment:
+      - HOSTNAME=0.0.0.0
+    ports:
+      - 3000:3000
+
+
+
+

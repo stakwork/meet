@@ -1,0 +1,30 @@
+services:
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    container_name: caddy.sphinx
+    command: caddy reverse-proxy --from https://$DOMAIN:443 --to http://livekit.sphinx:3000
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - caddy:/data
+    depends_on:
+      - livekit
+
+  livekit:
+    image: sphinx-livekit:latest
+    restart: on-failure
+    container_name: livekit.sphinx
+    ports:
+      - 3000:3000
+
+volumes:
+  caddy:
+
+  
+
+
+
+

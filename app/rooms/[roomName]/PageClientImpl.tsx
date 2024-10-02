@@ -1,7 +1,7 @@
 'use client';
 
 import { decodePassphrase } from '@/lib/client-utils';
-import { DebugMode } from '@/lib/Debug';
+import Transcript from '@/lib/Transcript';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
@@ -15,12 +15,15 @@ import {
 import {
   ExternalE2EEKeyProvider,
   RoomOptions,
+  RoomEvent,
+  TranscriptionSegment,
   VideoCodec,
   VideoPresets,
   Room,
   DeviceUnsupportedError,
   RoomConnectOptions,
 } from 'livekit-client';
+import { setLazyProp } from 'next/dist/server/api-utils';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -154,6 +157,37 @@ function VideoConferenceComponent(props: {
     };
   }, []);
 
+  const [transcriptions, setTranscriptions] = React.useState<{
+    [id: string]: TranscriptionSegment;
+  }>({});
+  const [latestText, setLatestText] = React.useState('');
+  React.useEffect(() => {
+    if (!room) {
+      return;
+    }
+    const updateTranscriptions = (
+      segments: TranscriptionSegment[],
+      participant: any,
+      publication: any,
+    ) => {
+      if (segments.length > 0) {
+        setLatestText(segments[0].text);
+      }
+      // setTranscriptions((prev) => {
+      //   const newTranscriptions = { ...prev };
+      //   for (const segment of segments) {
+      //     newTranscriptions[segment.id] = segment;
+      //   }
+      //   console.log('===>', newTranscriptions);
+      //   return newTranscriptions;
+      // });
+    };
+    room.on(RoomEvent.TranscriptionReceived, updateTranscriptions);
+    return () => {
+      room.off(RoomEvent.TranscriptionReceived, updateTranscriptions);
+    };
+  }, [room]);
+
   const router = useRouter();
   const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
 
@@ -172,8 +206,9 @@ function VideoConferenceComponent(props: {
           chatMessageFormatter={formatChatMessageLinks}
           SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
         />
-        <DebugMode />
+        {/* <DebugMode /> */}
         <RecordingIndicator />
+        <Transcript latestText={latestText} />
       </LiveKitRoom>
     </>
   );

@@ -7,11 +7,13 @@ import {
   Room,
   RoomConnectOptions,
   RoomOptions,
+  RoomEvent,
   VideoPresets,
+  type TranscriptionSegment,
   type VideoCodec,
 } from 'livekit-client';
 import { DebugMode } from '@/lib/Debug';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 
@@ -56,6 +58,33 @@ export function VideoConferenceClientImpl(props: {
       autoSubscribe: true,
     };
   }, []);
+
+  const [transcriptions, setTranscriptions] = useState<{ [id: string]: TranscriptionSegment }>({});
+  useEffect(() => {
+    if (!room) {
+      return;
+    }
+    console.log('ROOM!!!');
+    const updateTranscriptions = (
+      segments: TranscriptionSegment[],
+      participant: any,
+      publication: any,
+    ) => {
+      console.log('received transcriptions', segments);
+      setTranscriptions((prev) => {
+        const newTranscriptions = { ...prev };
+        for (const segment of segments) {
+          newTranscriptions[segment.id] = segment;
+        }
+        console.log('===>', newTranscriptions);
+        return newTranscriptions;
+      });
+    };
+    room.on(RoomEvent.TranscriptionReceived, updateTranscriptions);
+    return () => {
+      room.off(RoomEvent.TranscriptionReceived, updateTranscriptions);
+    };
+  }, [room]);
 
   return (
     <LiveKitRoom

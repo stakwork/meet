@@ -1,0 +1,14 @@
+
+.wrap {
+    position:absolute;
+    top: 32px;
+    width:100%;
+    left:0;
+    right:0;
+}
+
+.text{
+    color:white;
+    text-align:center;
+    margin:16px;
+}

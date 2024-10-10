@@ -27,9 +27,9 @@ export function SettingsMenu(props: SettingsMenuProps) {
 
   const settings = React.useMemo(() => {
     return {
+      recording: recordingEndpoint ? { label: 'Recording' } : undefined,
       media: { camera: true, microphone: true, label: 'Media Devices', speaker: true },
       effects: { label: 'Effects' },
-      recording: recordingEndpoint ? { label: 'Recording' } : undefined,
     };
   }, []);
 
@@ -92,10 +92,13 @@ export function SettingsMenu(props: SettingsMenuProps) {
     setProcessingRecRequest(true);
     setInitialRecStatus(isRecording);
     let response: Response;
+    const now = new Date(Date.now()).toISOString();
+    const fileName = `${now}-${room.name}.mp4`;
+    console.log('recoding to S3 file: ', fileName);
     if (isRecording) {
       response = await fetch(recordingEndpoint + `/stop?roomName=${room.name}`);
     } else {
-      response = await fetch(recordingEndpoint + `/start?roomName=${room.name}`);
+      response = await fetch(recordingEndpoint + `/start?roomName=${room.name}&now=${now}`);
     }
     if (response.ok) {
     } else {

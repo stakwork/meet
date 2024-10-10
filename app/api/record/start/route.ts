@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     const roomName = req.nextUrl.searchParams.get('roomName');
+    const now = req.nextUrl.searchParams.get('now');
 
+    new Date(Date.now()).toISOString();
     /**
      * CAUTION:
      * for simplicity this implementation does not authenticate users and therefore allows anyone with knowledge of a roomName
@@ -14,6 +16,9 @@ export async function GET(req: NextRequest) {
 
     if (roomName === null) {
       return new NextResponse('Missing roomName parameter', { status: 403 });
+    }
+    if (now === null) {
+      return new NextResponse('Missing now parameter', { status: 403 });
     }
 
     const {
@@ -38,11 +43,11 @@ export async function GET(req: NextRequest) {
     }
 
     const fileOutput = new EncodedFileOutput({
-      filepath: `${new Date(Date.now()).toISOString()}-${roomName}.mp4`,
+      filepath: `${now}-${roomName}.mp4`,
       output: {
         case: 's3',
         value: new S3Upload({
-          endpoint: S3_ENDPOINT,
+          // endpoint: S3_ENDPOINT,
           accessKey: S3_KEY_ID,
           secret: S3_KEY_SECRET,
           region: S3_REGION,

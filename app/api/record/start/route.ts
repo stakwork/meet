@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
     const roomName = req.nextUrl.searchParams.get('roomName');
     const now = req.nextUrl.searchParams.get('now');
 
-    new Date(Date.now()).toISOString();
+    // new Date(Date.now()).toISOString();
     /**
      * CAUTION:
      * for simplicity this implementation does not authenticate users and therefore allows anyone with knowledge of a roomName

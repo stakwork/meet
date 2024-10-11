@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
       S3_BUCKET,
       S3_ENDPOINT,
       S3_REGION,
+      RUNNER_URL,
+      RUNNER_SECRET,
     } = process.env;
 
     const hostURL = new URL(LIVEKIT_URL!);
@@ -42,8 +44,9 @@ export async function GET(req: NextRequest) {
       return new NextResponse('Meeting is already being recorded', { status: 409 });
     }
 
+    const filepath = `${now}-${roomName}.mp4`;
     const fileOutput = new EncodedFileOutput({
-      filepath: `${now}-${roomName}.mp4`,
+      filepath: filepath,
       output: {
         case: 's3',
         value: new S3Upload({
@@ -66,10 +69,36 @@ export async function GET(req: NextRequest) {
       },
     );
 
+    if (RUNNER_URL && RUNNER_SECRET) {
+      post_runner(RUNNER_URL, RUNNER_SECRET, filepath);
+    }
+
     return new NextResponse(null, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
       return new NextResponse(error.message, { status: 500 });
     }
+  }
+}
+
+async function post_runner(url: string, token: string, filepath: string) {
+  const humanReadableDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  try {
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        filepath,
+        show_title: 'Meeting',
+        episode_title: `Live call ${humanReadableDate}`,
+      }),
+      headers: { 'x-admin-token': token },
+    });
+  } catch (e) {
+    console.error(e);
   }
 }

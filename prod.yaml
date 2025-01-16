@@ -14,7 +14,7 @@ services:
       - livekit
 
   livekit:
-    image: sphinx-livekit:latest
+    image: sphinxlightning/sphinx-livekit:latest
     restart: on-failure
     command: ["node", "server.js"]
     container_name: livekit.sphinx

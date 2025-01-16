@@ -14,17 +14,17 @@ services:
       - livekit
 
   livekit:
-    image: sphinx-livekit:latest
+    build:
+      context: .
     restart: on-failure
+    command: ["node", "server.js"]
     container_name: livekit.sphinx
+    environment:
+      - HOSTNAME=0.0.0.0
     ports:
       - 3000:3000
 
 volumes:
   caddy:
-
-  
-
-
 
 

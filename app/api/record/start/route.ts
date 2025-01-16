@@ -88,6 +88,7 @@ async function post_runner(url: string, token: string, filepath: string) {
     month: 'long',
     day: 'numeric',
   });
+  console.log('post to runner:', filepath);
   try {
     await fetch(url, {
       method: 'POST',
@@ -102,3 +103,9 @@ async function post_runner(url: string, token: string, filepath: string) {
     console.error(e);
   }
 }
+
+/*
+
+02d4b00864dad8e3343909d092a97d33c87989fbe4591758ca5f6b648f018876b0:02736e7dad83d7205826649fc17db672ce08f8e87a2b47c7785ccbf79f24e91db0:1099586076673
+
+*/

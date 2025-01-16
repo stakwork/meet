@@ -14,8 +14,7 @@ services:
       - livekit
 
   livekit:
-    build:
-      context: .
+    image: sphinx-livekit:latest
     restart: on-failure
     command: ["node", "server.js"]
     container_name: livekit.sphinx
@@ -26,5 +25,9 @@ services:
 
 volumes:
   caddy:
+
+  
+
+
 
 

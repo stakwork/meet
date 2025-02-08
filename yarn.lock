@@ -135,17 +135,22 @@
   resolved "https://registry.yarnpkg.com/@livekit/krisp-noise-filter/-/krisp-noise-filter-0.2.8.tgz#5b2da6ff779830cebf952ecb4319d3ce6ce5433d"
   integrity sha512-WPlQOwm4bC3jxtCFxlc+l0Ai44NbfeSXwQ0MGnv4gC3TVam+imHU5agFHdc+6TFRsQAaq7wRtLjAbt7shrpzaw==
 
-"@livekit/protocol@1.20.1":
-  version "1.20.1"
-  resolved "https://registry.yarnpkg.com/@livekit/protocol/-/protocol-1.20.1.tgz#05706d6e077771e7ee512c47fcdc58fd5be8b539"
-  integrity sha512-TgyuwOx+XJn9inEYT9OKfFNs9YIPS4BdLa4pF5FDf9MhWRnahKwPe7jxr/+sVdWxYbZmy9hRrH58jSAFu0ONHw==
-  dependencies:
-    "@bufbuild/protobuf" "^1.7.2"
+"@livekit/mutex@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@livekit/mutex/-/mutex-1.1.1.tgz#72492b611d55be8130ba2271b7a436d94b1bc6d4"
+  integrity sha512-EsshAucklmpuUAfkABPxJNhzj9v2sG7JuzFDL4ML1oJQSV14sqrpTYnsaOudMAw9yOaW53NU3QQTlUQoRs4czw==
 
-"@livekit/protocol@^1.20.0":
-  version "1.22.0"
-  resolved "https://registry.yarnpkg.com/@livekit/protocol/-/protocol-1.22.0.tgz#344d5eeeb24916fc4cbe1afba638471b77dfc6e5"
-  integrity sha512-KYOfVAz38YFRsmEzeDgzoaHZJhMZEkeZQlzr9xIjczWR9SeEaYNU6+IDcZRlrYcpWl6Almgt/OhXcQn+nkrDGw==
+"@livekit/protocol@1.30.0":
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/@livekit/protocol/-/protocol-1.30.0.tgz#c79e98aca2a822f9bd217d016c6efd0f472f206f"
+  integrity sha512-SDI9ShVKj8N3oOSinr8inaxD3FXgmgoJlqN35uU/Yx1sdoDeQbzAuBFox7bYjM+VhnZ1V22ivIDjAsKr00H+XQ==
+  dependencies:
+    "@bufbuild/protobuf" "^1.10.0"
+
+"@livekit/protocol@^1.30.0":
+  version "1.33.0"
+  resolved "https://registry.yarnpkg.com/@livekit/protocol/-/protocol-1.33.0.tgz#b8dfcf82ca501e747533d519e51b5c80176bf03e"
+  integrity sha512-361mBlFgI3nvn8oSQIL38gDUBGbOSwsEOqPgX0c1Jwz75/sD/TTvPeAM4zAz6OrV5Q4vI4Ruswecnyv5SG4oig==
   dependencies:
     "@bufbuild/protobuf" "^1.10.0"
 
@@ -1672,26 +1677,28 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-livekit-client@2.5.2:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/livekit-client/-/livekit-client-2.5.2.tgz#3c8fcc67a0eb4a990822603e3f016d18b400a1a1"
-  integrity sha512-rzWFH02UznHxpnbj+WEEoHxL1ZSo9BdFK+7ltSZWniTt2llnNckdqeXNsjkBH6k+C9agHTF4XikmxKcpWa4YrQ==
+livekit-client@2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/livekit-client/-/livekit-client-2.8.1.tgz#2492587cde93ffb7bafcc3ce91f67e108fc63c4a"
+  integrity sha512-HPv9iHNrnBANI9ucK7CKZspx0sBZK3hjR2EbwaV08+J3RM9+tNGL2ob2n76nxJLEZG7LzdWlLZdbr4fQBP6Hkg==
   dependencies:
-    "@livekit/protocol" "1.20.1"
+    "@livekit/mutex" "1.1.1"
+    "@livekit/protocol" "1.30.0"
     events "^3.3.0"
     loglevel "^1.8.0"
     sdp-transform "^2.14.1"
     ts-debounce "^4.0.0"
-    tslib "2.7.0"
+    tslib "2.8.1"
     typed-emitter "^2.1.0"
     webrtc-adapter "^9.0.0"
 
-livekit-server-sdk@2.6.2:
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/livekit-server-sdk/-/livekit-server-sdk-2.6.2.tgz#38f422cdce2ace82dbc62796471e3a487cd43efd"
-  integrity sha512-3fFzHu7sAynUaUFTCKtRP9lgQCU0Qe/x7XA99GpT1ro7fTy1ZVzaWq34WcXEyUGBBMFxG19LlSIAQBcGZVStWQ==
+livekit-server-sdk@2.9.7:
+  version "2.9.7"
+  resolved "https://registry.yarnpkg.com/livekit-server-sdk/-/livekit-server-sdk-2.9.7.tgz#b782b04611ee7878e1946aecbb494e25302a3abc"
+  integrity sha512-uIkFOaqBCJnVgYOidZdanPWQH5G0LMxe0+Qp5zbx7MZCkJ7lGiju//yonfEvFofriJBKACjMq/KQHBex96QpeA==
   dependencies:
-    "@livekit/protocol" "^1.20.0"
+    "@bufbuild/protobuf" "^1.7.2"
+    "@livekit/protocol" "^1.30.0"
     camelcase-keys "^9.0.0"
     jose "^5.1.2"
 
@@ -2391,7 +2398,12 @@ tsconfig-paths@^3.15.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tslib@2.7.0, tslib@^2.1.0, tslib@^2.4.0:
+tslib@2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
+  integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
+
+tslib@^2.1.0, tslib@^2.4.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.7.0.tgz#d9b40c5c40ab59e8738f297df3087bf1a2690c01"
   integrity sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==

@@ -12,7 +12,8 @@
   right: 0;
   background: rgba(0, 0, 0, 0.8); 
   z-index: 1000;
-  backdrop-filter: blur(5px); 
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px); /* Added for Safari compatibility */
 }
 
 .room-name-box {
@@ -60,69 +61,52 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
 }
 
+/* Mic button */
 .mic-button[data-lk-audio-enabled="false"] {
-  background: #ff5252; 
-  opacity: 0.8; 
+  background: rgba(255, 82, 82, 0.2);
 }
 
 .mic-button[data-lk-audio-enabled="true"] .material-symbols-outlined {
-  content: 'mic';
   color: #ffffff;
 }
 
 .mic-button[data-lk-audio-enabled="false"] .material-symbols-outlined {
-  content: 'mic_off';
-  color: #ffffff;
+  color: #ff6f6f;
 }
 
+/* Camera btn */
 .camera-button[data-lk-video-enabled="false"] {
-  background: #ff5252;
-  opacity: 0.8;
+  background: rgba(255, 82, 82, 0.2);
 }
 
 .camera-button[data-lk-video-enabled="true"] .material-symbols-outlined {
-  content: 'videocam';
-  color: #ffffff; 
+  color: #ffffff;
 }
 
 .camera-button[data-lk-video-enabled="false"] .material-symbols-outlined {
-  content: 'videocam_off';
-  color: #ffffff;
+  color: #ff6f6f;
 }
 
+/* Screen share btn */
 .screen-share-button[data-lk-screen-share-enabled="true"] .material-symbols-outlined {
-  content: 'screen_share';
-  color: #49c998; 
+  color: #49c998;
 }
 
 .screen-share-button[data-lk-screen-share-enabled="false"] .material-symbols-outlined {
-  content: 'screen_share';
-  color: #ffffff; 
+  color: #ffffff;
 }
 
-.record-sign {
-  background: rgba(144, 155, 170, 0.1); 
-}
-
-.record-sign.disabled {
-  background: rgba(144, 155, 170, 0.1); 
-}
-
-.record-sign .material-symbols-outlined,
-.record-sign.disabled .material-symbols-outlined {
-  font-size: 24px;
-}
-
+/* Record */
 .record-sign .material-symbols-outlined {
-  color: #ff6f6f; 
-  animation: pulse 1s infinite;
+  color: #ff6f6f;
+  animation: pulse 1.5s infinite;
 }
 
 .record-sign.disabled .material-symbols-outlined {
   color: #ffffff;
+  animation: none;
 }
 
 @keyframes pulse {
@@ -131,56 +115,66 @@
   100% { opacity: 1; }
 }
 
+/* End call */
 .end-call-button {
   width: 64px;
   height: 40px;
-  background: #ff5252; 
+  background: #ff5252;
   border-radius: 8px;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .end-call-button .material-symbols-outlined {
-  font-size: 24px;
-  color: #ffffff; 
+  color: #ffffff;
 }
 
-.settings-section {
-  position: relative;
+
+.top-right-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-.settings-button {
+.participant-box {
+  background-color: rgba(144, 155, 170, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  gap: 8px;
+}
+
+.participant-box .material-symbols-outlined {
+  font-size: 20px;
+  color: white;
+}
+
+.participant-count {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+}
+
+.settings-box {
+  background-color: rgba(144, 155, 170, 0.1);
+  border-radius: 8px;
   width: 40px;
   height: 40px;
-  background: rgba(144, 155, 170, 0.1); 
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
-.settings-button .material-symbols-outlined {
-  font-size: 24px;
-  color: #ffffff; 
+.settings-box .material-symbols-outlined {
+  font-size: 20px;
+  color: white;
 }
 
-
+/* Fix for video layout */
 .lk-grid-layout {
-  height: calc(100vh - 60px) !important; 
-  width: 100% !important;
-}
-
-.lk-grid-layout > div {
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-.lk-video {
-  object-fit: cover !important;
-  background-color: #000 !important; 
+  height: calc(100vh - 60px) !important;
 }

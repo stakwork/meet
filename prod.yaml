@@ -25,5 +25,15 @@ services:
     ports:
       - 3000:3000
 
+  voice:
+    image: sphinxlightning/sphinx-voice:latest
+    container_name: voice.sphinx
+    restart: on-failure
+    environment:
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+
 volumes:
   caddy:

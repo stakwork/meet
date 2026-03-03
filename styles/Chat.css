@@ -74,3 +74,77 @@
 .lk-chat-entry[data-lk-message-origin='remote'] .lk-message-body {
   background-color: #3e6189;
 }
+
+/* Markdown content inside chat messages */
+.lk-message-body p {
+  margin: 0 0 0.4em;
+}
+.lk-message-body p:last-child {
+  margin-bottom: 0;
+}
+.lk-message-body a {
+  color: #6cb6ff;
+  text-decoration: underline;
+  word-break: break-all;
+}
+.lk-message-body a:hover {
+  color: #8fcaff;
+}
+.lk-message-body h1,
+.lk-message-body h2,
+.lk-message-body h3,
+.lk-message-body h4,
+.lk-message-body h5,
+.lk-message-body h6 {
+  margin: 0.4em 0 0.2em;
+  line-height: 1.3;
+}
+.lk-message-body h1 { font-size: 1.25em; }
+.lk-message-body h2 { font-size: 1.15em; }
+.lk-message-body h3 { font-size: 1.05em; }
+.lk-message-body ul,
+.lk-message-body ol {
+  margin: 0.2em 0;
+  padding-left: 1.4em;
+}
+.lk-message-body li {
+  margin-bottom: 0.15em;
+}
+.lk-message-body code {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.lk-message-body pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.5em;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.3em 0;
+}
+.lk-message-body pre code {
+  background: none;
+  padding: 0;
+}
+.lk-message-body blockquote {
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  margin: 0.3em 0;
+  padding-left: 0.6em;
+  color: rgba(255, 255, 255, 0.7);
+}
+.lk-message-body hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 0.4em 0;
+}
+.lk-message-body strong {
+  font-weight: 600;
+}
+.lk-message-body em {
+  font-style: italic;
+}
+.lk-message-body img {
+  max-width: 100%;
+  border-radius: 4px;
+}

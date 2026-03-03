@@ -15,6 +15,7 @@ import { SettingsMenu } from '@/lib/SettingsMenu';
 import { useCustomLayoutContext } from '@/app/contexts/layout-context';
 import '@/styles/Chat.css';
 import { FocusLayout, FocusLayoutContainer } from './FocusLayout';
+import { chatMessageFormatter } from '@/lib/chatMessageFormatter';
 
 export const CustomVideoLayout: React.FC = () => {
   const { isChatOpen, isParticipantsListOpen } = useCustomLayoutContext();
@@ -78,7 +79,9 @@ export const CustomVideoLayout: React.FC = () => {
         </div>
       </div>
       {isParticipantsListOpen.state && <ParticipantList />}
-      {isChatOpen.state && <Chat />}
+      <div style={{ display: isChatOpen.state ? 'contents' : 'none' }}>
+        <Chat messageFormatter={chatMessageFormatter} />
+      </div>
       <SettingsMenu showSettings={layoutContext.widget.state?.showSettings || false} />
     </div>
   );

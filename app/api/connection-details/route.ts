@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const roomName = request.nextUrl.searchParams.get('roomName');
     const participantName = request.nextUrl.searchParams.get('participantName');
-    const metadata = request.nextUrl.searchParams.get('metadata') ?? '';
+    let metadata = request.nextUrl.searchParams.get('metadata') ?? '';
     const region = request.nextUrl.searchParams.get('region');
     const livekitServerUrl = region ? getLiveKitURL(region) : LIVEKIT_URL;
     if (livekitServerUrl === undefined) {
@@ -24,6 +24,14 @@ export async function GET(request: NextRequest) {
     }
     if (participantName === null) {
       return new NextResponse('Missing required query parameter: participantName', { status: 400 });
+    }
+
+    // If a hive token is provided, embed it in participant metadata
+    // so the voice agent can read it from any participant in the room
+    const hiveToken = request.nextUrl.searchParams.get('hiveToken');
+    if (hiveToken) {
+      const existing = metadata ? JSON.parse(metadata) : {};
+      metadata = JSON.stringify({ ...existing, hiveToken });
     }
 
     // Generate participant token

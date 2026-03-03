@@ -34,6 +34,7 @@ services:
       - LIVEKIT_URL=${LIVEKIT_URL}
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - MCP_SERVERS=${MCP_SERVERS}
 
 volumes:
   caddy:

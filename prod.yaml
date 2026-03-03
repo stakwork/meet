@@ -35,6 +35,7 @@ services:
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
       - MCP_SERVERS=${MCP_SERVERS}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 
 volumes:
   caddy:

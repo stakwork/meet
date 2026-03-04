@@ -19,6 +19,7 @@ import {
   RoomConnectOptions,
   RoomEvent,
   TranscriptionSegment,
+  Participant,
 } from 'livekit-client';
 import { useRouter } from 'next/navigation';
 import '../../../styles/PageClientImpl.css';
@@ -179,9 +180,14 @@ function VideoConferenceComponent(props: {
   useEffect(() => {
     if (!room) return;
 
-    const updateTranscriptions = (segments: TranscriptionSegment[]) => {
+    const updateTranscriptions = (
+      segments: TranscriptionSegment[],
+      participant?: Participant,
+    ) => {
       if (segments.length > 0) {
-        setLatestText(segments[0].text);
+        const name = participant?.name || participant?.identity || '';
+        const prefix = name ? `${name}: ` : '';
+        setLatestText(`${prefix}${segments[0].text}`);
         if (hideTimer.current) clearTimeout(hideTimer.current);
         hideTimer.current = setTimeout(() => setLatestText(''), 4400);
       }

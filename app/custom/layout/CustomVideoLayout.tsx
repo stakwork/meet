@@ -37,6 +37,7 @@ export const CustomVideoLayout: React.FC = () => {
 
   return (
     <div
+      className={`video-layout${isChatOpen.state ? ' chat-open' : ''}${isParticipantsListOpen.state ? ' participants-open' : ''}`}
       style={{
         display: 'flex',
         flexDirection: 'row',
@@ -47,6 +48,7 @@ export const CustomVideoLayout: React.FC = () => {
       }}
     >
       <div
+        className="video-area"
         style={{
           flex: 1,
           minHeight: 0,
@@ -82,8 +84,10 @@ export const CustomVideoLayout: React.FC = () => {
           <CustomControlBar />
         </div>
       </div>
-      {isParticipantsListOpen.state && <ParticipantList />}
-      <div style={{ display: isChatOpen.state ? 'contents' : 'none' }}>
+      <div className="side-panel-wrapper participants-panel" style={{ display: isParticipantsListOpen.state ? 'contents' : 'none' }}>
+        <ParticipantList />
+      </div>
+      <div className="side-panel-wrapper chat-panel" style={{ display: isChatOpen.state ? 'contents' : 'none' }}>
         <Chat messageFormatter={chatMessageFormatter} />
       </div>
       <SettingsMenu showSettings={layoutContext.widget.state?.showSettings || false} />

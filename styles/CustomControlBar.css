@@ -204,3 +204,67 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  /* When chat or participants panel is open, hide the video area */
+  .video-layout.chat-open > .video-area,
+  .video-layout.participants-open > .video-area {
+    display: none !important;
+  }
+
+  /* Chat panel: full-size flex container on mobile */
+  .video-layout.chat-open > .chat-panel {
+    display: flex !important;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  /* Participants panel: full-size flex container on mobile */
+  .video-layout.participants-open > .participants-panel {
+    display: flex !important;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  /* Participants list inner div full-screen on mobile */
+  .video-layout.participants-open > .participants-panel > div {
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Control bar: single centered row on mobile */
+  .room-name-box {
+    display: none;
+  }
+
+  .record-btn,
+  .screenshare-btn {
+    display: none;
+  }
+
+  .control-bar.control-buttons {
+    position: static;
+    transform: none;
+    flex-grow: 0;
+  }
+
+  .custom-control-bar {
+    justify-content: center;
+    gap: 8px;
+    padding: 0.6rem 0.5rem calc(1.2rem + env(safe-area-inset-bottom));
+  }
+
+  .top-right-controls {
+    gap: 8px;
+  }
+
+  .end-call-button {
+    width: 3.2rem;
+  }
+}

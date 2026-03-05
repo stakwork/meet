@@ -7,6 +7,7 @@
   background-color: #151e27;
   border-radius: 0.5rem;
   border: 0px;
+  align-items: stretch;
 }
 
 .lk-chat-header {
@@ -20,16 +21,22 @@
   font-size: 1.05rem;
 }
 
-.lk-close-button.lk-button.lk-chat-toggle {
+.lk-chat-header .lk-close-button.lk-button.lk-chat-toggle {
   color: #556171;
   cursor: pointer;
   background-color: transparent;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  position: absolute;
+  right: 0.75rem;
+  transform: none;
+  overflow: hidden;
 }
 
 .lk-close-button.lk-button.lk-chat-toggle > svg {
   width: 1.3rem;
   height: 1.3rem;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .lk-close-button.lk-button.lk-chat-toggle > svg > path {
@@ -156,4 +163,14 @@
 .lk-message-body img {
   max-width: 100%;
   border-radius: 4px;
+}
+
+/* ── Mobile: chat covers the full screen ── */
+@media (max-width: 768px) {
+  .lk-chat {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    height: 100%;
+  }
 }

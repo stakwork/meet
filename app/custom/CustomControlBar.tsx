@@ -169,7 +169,7 @@ export function CustomControlBar() {
         <TrackToggle source={Track.Source.Microphone} />
         <TrackToggle source={Track.Source.Camera} />
         <div
-          className={`control-btn ${isRecording ? '' : 'disabled'} ${isRecordingRequestPending || isRecording ? 'blinking' : ''}`}
+          className={`control-btn record-btn ${isRecording ? '' : 'disabled'} ${isRecordingRequestPending || isRecording ? 'blinking' : ''}`}
           onClick={toggleRoomRecording}
           style={{
             cursor: isRecordingRequestPending ? 'not-allowed' : 'pointer',
@@ -182,7 +182,9 @@ export function CustomControlBar() {
           )}
         </div>
 
-        <TrackToggle source={Track.Source.ScreenShare} />
+        <span className="screenshare-btn">
+          <TrackToggle source={Track.Source.ScreenShare} />
+        </span>
         <DisconnectButton className="end-call-button">
           <span className="material-symbols-outlined">call_end</span>
         </DisconnectButton>

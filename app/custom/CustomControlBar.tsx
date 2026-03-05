@@ -8,7 +8,7 @@ import {
   useRoomContext,
 } from '@livekit/components-react';
 import { Room, RoomEvent, Track } from 'livekit-client';
-import { mergeClasses } from '@/lib/client-utils';
+import { isHiddenParticipant, mergeClasses } from '@/lib/client-utils';
 import { ToggleSource } from '@livekit/components-core';
 import '../../styles/CustomControlBar.css';
 import { CameraOffSVG, CameraOnSVG } from '../svg/camera';
@@ -17,12 +17,21 @@ import { ScreenShareOnSVG } from '../svg/screen-share';
 import { useCustomLayoutContext } from '../contexts/layout-context';
 import { useToast } from './toast/use-toast';
 
+/** Count participants excluding those with `{ hidden: true }` metadata. */
+function countVisibleParticipants(room: Room): number {
+  let count = 1; // local participant
+  for (const [, p] of room.remoteParticipants) {
+    if (!isHiddenParticipant(p.metadata)) count++;
+  }
+  return count;
+}
+
 export function CustomControlBar() {
   const room = useRoomContext();
   const recordingEndpoint = process.env.NEXT_PUBLIC_LK_RECORD_ENDPOINT;
   const { localParticipant } = useLocalParticipant();
   const [isRecordingRequestPending, setIsRecordingRequestPending] = useState(false);
-  const [participantCount, setParticipantCount] = useState(room.numParticipants);
+  const [participantCount, setParticipantCount] = useState(() => countVisibleParticipants(room));
   const { dispatch } = useLayoutContext().widget;
   const { isParticipantsListOpen, isChatOpen } = useCustomLayoutContext();
   const { toast } = useToast();
@@ -119,18 +128,20 @@ export function CustomControlBar() {
   useEffect(() => {
     if (room) {
       const updateParticipantCount = () => {
-        setParticipantCount(room.numParticipants);
+        setParticipantCount(countVisibleParticipants(room));
       };
 
       room.on(RoomEvent.Connected, updateParticipantCount);
       room.on(RoomEvent.ParticipantConnected, updateParticipantCount);
       room.on(RoomEvent.ParticipantDisconnected, updateParticipantCount);
+      room.on(RoomEvent.ParticipantMetadataChanged, updateParticipantCount);
       room.on(RoomEvent.RoomMetadataChanged, updateRoomMetadata);
 
       return () => {
         room.off(RoomEvent.Connected, updateParticipantCount);
         room.off(RoomEvent.ParticipantConnected, updateParticipantCount);
         room.off(RoomEvent.ParticipantDisconnected, updateParticipantCount);
+        room.off(RoomEvent.ParticipantMetadataChanged, updateParticipantCount);
         room.off(RoomEvent.RoomMetadataChanged, updateRoomMetadata);
       };
     }

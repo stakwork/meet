@@ -52,6 +52,16 @@ export function getAvatarColor(identity: string): string {
   return colors[index];
 }
 
+/** Returns true if the participant's metadata contains `{ hidden: true }`. */
+export function isHiddenParticipant(metadata?: string): boolean {
+  if (!metadata) return false;
+  try {
+    return JSON.parse(metadata).hidden === true;
+  } catch {
+    return false;
+  }
+}
+
 export function getInitials(name: string): string {
   if (!name) return '?';
 

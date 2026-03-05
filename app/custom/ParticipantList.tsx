@@ -3,12 +3,15 @@ import { Participant, RemoteParticipant } from 'livekit-client';
 import { MicOffSVG, MicOnSVG } from '../svg/mic';
 import { CameraOffSVG, CameraOnSVG } from '../svg/camera';
 import { ScreenShareOnSVG } from '../svg/screen-share';
-import { getAvatarColor, getInitials } from '@/lib/client-utils';
+import { getAvatarColor, getInitials, isHiddenParticipant } from '@/lib/client-utils';
 import { useCustomLayoutContext } from '../contexts/layout-context';
 
 const ParticipantList = () => {
   const room = useRoomContext();
   const { localParticipant, remoteParticipants } = room;
+  const visibleRemote = [...remoteParticipants.values()].filter(
+    (p) => !isHiddenParticipant(p.metadata),
+  );
   const { isParticipantsListOpen } = useCustomLayoutContext();
 
   function ToggleParticipantList() {
@@ -45,7 +48,7 @@ const ParticipantList = () => {
             fontWeight: 'bold',
           }}
         >
-          <span>{room.numParticipants}</span>
+          <span>{visibleRemote.length + 1}</span>
           <span>Participants</span>
         </div>
         <div
@@ -57,9 +60,9 @@ const ParticipantList = () => {
         </div>
       </div>
       <ParticipantItem participant={localParticipant} />
-      {[...remoteParticipants.entries()].map((participant) => {
-        return <ParticipantItem participant={participant[1]} />;
-      })}
+      {visibleRemote.map((participant) => (
+        <ParticipantItem key={participant.identity} participant={participant} />
+      ))}
     </div>
   );
 };

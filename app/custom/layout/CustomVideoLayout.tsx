@@ -13,6 +13,7 @@ import ParticipantList from '@/app/custom/ParticipantList';
 import { ParticipantTile } from '@/lib/ParticipantTile';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { useCustomLayoutContext } from '@/app/contexts/layout-context';
+import { isHiddenParticipant } from '@/lib/client-utils';
 import '@/styles/Chat.css';
 import { FocusLayout, FocusLayoutContainer } from './FocusLayout';
 import { chatMessageFormatter } from '@/lib/chatMessageFormatter';
@@ -21,13 +22,16 @@ export const CustomVideoLayout: React.FC = () => {
   const { isChatOpen, isParticipantsListOpen } = useCustomLayoutContext();
   const layoutContext = useLayoutContext();
 
-  const tracks = useTracks(
+  const allTracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
       { source: Track.Source.ScreenShare, withPlaceholder: false },
     ],
     { onlySubscribed: false },
   );
+
+  // Filter out participants marked as hidden (e.g. transcribe-only agents)
+  const tracks = allTracks.filter((t) => !isHiddenParticipant(t.participant.metadata));
 
   const focusTrack = usePinnedTracks()[0];
 

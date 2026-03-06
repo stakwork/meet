@@ -245,7 +245,7 @@
 
   .record-btn,
   .screenshare-btn {
-    display: none;
+    display: none !important;
   }
 
   .control-bar.control-buttons {

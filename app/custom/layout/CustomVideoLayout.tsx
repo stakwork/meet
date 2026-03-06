@@ -41,7 +41,7 @@ export const CustomVideoLayout: React.FC = () => {
       style={{
         display: 'flex',
         flexDirection: 'row',
-        height: '100vh',
+        height: '100dvh',
         width: '100vw',
         position: 'relative',
         backgroundColor: '#070707',

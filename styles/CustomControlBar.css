@@ -196,7 +196,7 @@
 
 /* Fix for video layout */
 .lk-grid-layout {
-  height: calc(100vh - 60px) !important;
+  height: calc(100dvh - 60px) !important;
 }
 
 .control-bar.control-buttons {

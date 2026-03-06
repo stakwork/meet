@@ -9,7 +9,7 @@
 }
 
 .video-grid {
-  height: calc(100vh - 60px) !important;
+  height: calc(100dvh - 60px) !important;
 }
 
 .video-container {
@@ -19,7 +19,7 @@
 }
 
 .empty-video-container {
-  height: calc(100vh - 60px);
+  height: calc(100dvh - 60px);
   display: grid;
   place-items: center;
 }

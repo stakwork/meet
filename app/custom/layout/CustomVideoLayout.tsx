@@ -17,6 +17,7 @@ import { isHiddenParticipant } from '@/lib/client-utils';
 import '@/styles/Chat.css';
 import { FocusLayout, FocusLayoutContainer } from './FocusLayout';
 import { chatMessageFormatter } from '@/lib/chatMessageFormatter';
+import { CustomChatEntry } from '@/lib/CustomChatEntry';
 
 export const CustomVideoLayout: React.FC = () => {
   const { isChatOpen, isParticipantsListOpen } = useCustomLayoutContext();
@@ -88,7 +89,9 @@ export const CustomVideoLayout: React.FC = () => {
         <ParticipantList />
       </div>
       <div className="side-panel-wrapper chat-panel" style={{ display: isChatOpen.state ? 'contents' : 'none' }}>
-        <Chat messageFormatter={chatMessageFormatter} />
+        <Chat messageFormatter={chatMessageFormatter}>
+          <CustomChatEntry entry={{} as any} />
+        </Chat>
       </div>
       <SettingsMenu showSettings={layoutContext.widget.state?.showSettings || false} />
     </div>

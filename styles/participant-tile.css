@@ -127,3 +127,30 @@
 .data-lk-quality {
   top: 0;
 }
+
+/* TTS toggle inline next to agent name */
+.tts-tile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1.1rem;
+  cursor: pointer;
+}
+
+.tts-tile-btn .material-symbols-outlined {
+  font-size: 18px;
+  color: #909baa;
+  transition: color 0.15s ease;
+}
+
+.tts-tile-btn:hover .material-symbols-outlined {
+  color: #c0c8d2;
+}
+
+.tts-tile-btn.tts-tile-active .material-symbols-outlined {
+  color: #49c998;
+}
+
+.tts-tile-btn.tts-tile-active:hover .material-symbols-outlined {
+  color: #5dd4a6;
+}

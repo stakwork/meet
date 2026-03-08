@@ -18,6 +18,8 @@ import {
   FocusToggle,
 } from '@livekit/components-react';
 import { getAvatarColor, getInitials } from './client-utils';
+import { useAgentTts } from './useAgentTts';
+import { useRoomContext } from '@livekit/components-react';
 
 export function ParticipantContextIfNeeded(
   props: React.PropsWithChildren<{
@@ -72,11 +74,16 @@ export const ParticipantTile: (
       name,
       identity,
       metadata,
+      attributes,
       isEncrypted,
       isSpeaking,
       isMicrophoneEnabled,
       isScreenShareEnabled,
     } = trackReference.participant;
+
+    const isAgent = attributes?.tts !== undefined;
+    const room = useRoomContext();
+    const { ttsState, toggle: toggleTts } = useAgentTts(room);
 
     const { elementProps } = useParticipantTile<HTMLDivElement>({
       htmlProps,
@@ -173,6 +180,20 @@ export const ParticipantTile: (
                           ? ' (Screen Share)'
                           : ''}
                       </span>
+                      {isAgent && ttsState !== null && (
+                        <span
+                          className={`tts-tile-btn${ttsState === 'on' ? ' tts-tile-active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTts();
+                          }}
+                          title={ttsState === 'on' ? 'Mute Jamie' : 'Unmute Jamie'}
+                        >
+                          <span className="material-symbols-outlined">
+                            {ttsState === 'on' ? 'volume_up' : 'volume_off'}
+                          </span>
+                        </span>
+                      )}
                     </div>
                   </div>
                   <ConnectionQualityIndicator className="lk-participant-metadata-item" />

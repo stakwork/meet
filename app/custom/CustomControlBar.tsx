@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   DisconnectButton,
   useLayoutContext,
@@ -26,50 +26,6 @@ function countVisibleParticipants(room: Room): number {
   return count;
 }
 
-/**
- * Track the voice agent's TTS attribute. Returns the current state ("on" | "off" | null)
- * and a toggle function. Returns null when no agent is present in the room.
- */
-function useAgentTts(room: Room) {
-  /** Find the agent participant (the one with a `tts` attribute). */
-  const findAgent = useCallback(() => {
-    for (const [, p] of room.remoteParticipants) {
-      if (p.attributes?.tts !== undefined) return p;
-    }
-    return undefined;
-  }, [room]);
-
-  const [ttsState, setTtsState] = useState<string | null>(() => {
-    return findAgent()?.attributes?.tts ?? null;
-  });
-
-  useEffect(() => {
-    const update = () => {
-      setTtsState(findAgent()?.attributes?.tts ?? null);
-    };
-    // Re-check when room connects (state fully synced), participants join/leave,
-    // or their attributes change.
-    room.on(RoomEvent.Connected, update);
-    room.on(RoomEvent.ParticipantConnected, update);
-    room.on(RoomEvent.ParticipantDisconnected, update);
-    room.on(RoomEvent.ParticipantAttributesChanged, update);
-    update();
-    return () => {
-      room.off(RoomEvent.Connected, update);
-      room.off(RoomEvent.ParticipantConnected, update);
-      room.off(RoomEvent.ParticipantDisconnected, update);
-      room.off(RoomEvent.ParticipantAttributesChanged, update);
-    };
-  }, [room, findAgent]);
-
-  const toggle = useCallback(() => {
-    const payload = new TextEncoder().encode(JSON.stringify({ type: 'tts-toggle' }));
-    room.localParticipant.publishData(payload, { reliable: true, topic: 'lk-chat-topic' });
-  }, [room]);
-
-  return { ttsState, toggle };
-}
-
 export function CustomControlBar() {
   const room = useRoomContext();
   const recordingEndpoint = process.env.NEXT_PUBLIC_LK_RECORD_ENDPOINT;
@@ -79,7 +35,6 @@ export function CustomControlBar() {
   const { dispatch } = useLayoutContext().widget;
   const { isParticipantsListOpen, isChatOpen } = useCustomLayoutContext();
   const { toast } = useToast();
-  const { ttsState, toggle: toggleTts } = useAgentTts(room);
   const [recordingState, setRecordingState] = useState({
     recording: { isRecording: false, recorder: '' },
   });
@@ -244,17 +199,6 @@ export function CustomControlBar() {
         <div className={`control-btn`} onClick={toggleChat}>
           <span className="material-symbols-outlined">chat</span>
         </div>
-        {ttsState !== null && (
-          <div
-            className={`control-btn tts-btn${ttsState === 'on' ? ' tts-active' : ''}`}
-            onClick={toggleTts}
-            title={ttsState === 'on' ? 'Mute Jamie' : 'Unmute Jamie'}
-          >
-            <span className="material-symbols-outlined">
-              {ttsState === 'on' ? 'volume_up' : 'volume_off'}
-            </span>
-          </div>
-        )}
         <div
           className="settings-box"
           onClick={() => {

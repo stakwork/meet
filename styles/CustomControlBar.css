@@ -194,6 +194,30 @@
   color: white;
 }
 
+/* TTS toggle */
+.tts-btn {
+  background-color: #181d23;
+  border-radius: 8px;
+  padding: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tts-btn:hover {
+  background-color: #1f242b;
+}
+
+.tts-btn .material-symbols-outlined {
+  font-size: 20px;
+  color: #909baa;
+}
+
+.tts-btn.tts-active .material-symbols-outlined {
+  color: #49c998;
+}
+
 /* Fix for video layout */
 .lk-grid-layout {
   height: calc(100dvh - 60px) !important;

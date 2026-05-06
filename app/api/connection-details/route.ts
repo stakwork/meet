@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Missing required query parameter: participantName', { status: 400 });
     }
 
+    const isHost = request.nextUrl.searchParams.get('isHost') === 'true';
+
     // If a hive token is provided, embed it in participant metadata
     // so the voice agent can read it from any participant in the room
     const hiveToken = request.nextUrl.searchParams.get('hiveToken');
@@ -42,6 +44,7 @@ export async function GET(request: NextRequest) {
         metadata,
       },
       roomName,
+      isHost,
     );
 
     // Return connection details
@@ -59,7 +62,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function createParticipantToken(userInfo: AccessTokenOptions, roomName: string) {
+function createParticipantToken(
+  userInfo: AccessTokenOptions,
+  roomName: string,
+  isHost: boolean = false,
+) {
   const at = new AccessToken(API_KEY, API_SECRET, userInfo);
   at.ttl = '5m';
   const grant: VideoGrant = {
@@ -68,6 +75,7 @@ function createParticipantToken(userInfo: AccessTokenOptions, roomName: string) 
     canPublish: true,
     canPublishData: true,
     canSubscribe: true,
+    roomAdmin: isHost,
   };
   at.addGrant(grant);
   return at.toJwt();

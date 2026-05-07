@@ -22,6 +22,17 @@ services:
     container_name: livekit.sphinx
     environment:
       - HOSTNAME=0.0.0.0
+      # Secrets — provided at runtime, never baked into the image
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_REGION=${S3_REGION}
+      - S3_KEY_ID=${S3_KEY_ID}
+      - S3_KEY_SECRET=${S3_KEY_SECRET}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - RUNNER_URL=${RUNNER_URL}
+      - RUNNER_SECRET=${RUNNER_SECRET}
     ports:
       - 3000:3000
 

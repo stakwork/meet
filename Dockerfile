@@ -22,8 +22,20 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# This will do the trick, use the corresponding env file for each environment.
-COPY .env.local .env.production
+
+# Build-time env for NEXT_PUBLIC_* vars only (these get inlined into the client bundle).
+# Secrets (LIVEKIT_API_KEY, LIVEKIT_API_SECRET, S3_*, etc.) are provided at runtime
+# via the orchestrator (see prod.yaml) — DO NOT bake them into the image.
+ARG NEXT_PUBLIC_SHOW_SETTINGS_MENU=true
+ARG NEXT_PUBLIC_LK_RECORD_ENDPOINT=/api/record
+ARG NEXT_PUBLIC_CONN_DETAILS_ENDPOINT
+ARG NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
+ARG NEXT_PUBLIC_DATADOG_SITE
+ENV NEXT_PUBLIC_SHOW_SETTINGS_MENU=${NEXT_PUBLIC_SHOW_SETTINGS_MENU}
+ENV NEXT_PUBLIC_LK_RECORD_ENDPOINT=${NEXT_PUBLIC_LK_RECORD_ENDPOINT}
+ENV NEXT_PUBLIC_CONN_DETAILS_ENDPOINT=${NEXT_PUBLIC_CONN_DETAILS_ENDPOINT}
+ENV NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}
+ENV NEXT_PUBLIC_DATADOG_SITE=${NEXT_PUBLIC_DATADOG_SITE}
 
 RUN mkdir -p public/.well-known
 COPY assetlinks.json public/.well-known/assetlinks.json

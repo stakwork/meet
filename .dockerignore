@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+
+# Never bake env files into the image — secrets are provided at runtime via the orchestrator
+.env
+.env.*
+!.env.example

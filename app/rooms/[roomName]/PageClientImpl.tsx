@@ -28,7 +28,7 @@ import CustomVideoLayout from '@/app/custom/layout/CustomVideoLayout';
 import Transcript from '@/lib/Transcript';
 
 const CONN_DETAILS_ENDPOINT =
-  process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? '/api/connection-details';
+  process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT || '/api/connection-details';
 
 export function PageClientImpl(props: {
   roomName: string;

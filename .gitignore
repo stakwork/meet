@@ -17,6 +17,9 @@
 # production
 /build
 
+# compiled custom server (tsconfig.server.json)
+/dist
+
 # misc
 .DS_Store
 *.pem

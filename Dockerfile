@@ -17,6 +17,22 @@ RUN \
     fi
 
 
+# 1b. Production-only dependencies for the runtime image.
+# The custom server (dist/server.js) is CommonJS and resolves its deps (ws,
+# livekit-server-sdk, next, ...) from a full node_modules at runtime, so we ship a
+# complete production install rather than Next's ESM-only standalone trace.
+FROM base AS prod-deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile --production; \
+    elif [ -f package-lock.json ]; then npm ci --omit=dev; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --prod; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+
 # 2. Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
@@ -41,10 +57,12 @@ RUN mkdir -p public/.well-known
 COPY assetlinks.json public/.well-known/assetlinks.json
 COPY apple-app-site-association public/.well-known/apple-app-site-association
 
+# Build the Next app and compile the custom server (server.ts -> dist/server.js,
+# lib/wsServer.ts -> dist/lib/wsServer.js).
 RUN npm run build
 RUN npx tsc --project tsconfig.server.json
 
-# 3. Production image, copy all the files and run next
+# 3. Production image: full prod node_modules + Next build + custom server.
 FROM base AS runner
 WORKDIR /app
 
@@ -53,19 +71,16 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Build cache is not needed at runtime.
+RUN rm -rf .next/cache
 
-# The custom server (server.js, compiled from server.ts) requires 'ws' at runtime.
-# Next's standalone output bundles 'ws' into the API route chunk and does not emit
-# it as a standalone module, so copy it explicitly for the custom server. ('ws' has
-# no runtime dependencies of its own.)
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/ws ./node_modules/ws
-
+# Place the compiled custom server at the app root: ./server.js and ./lib/wsServer.js
+COPY --from=builder --chown=nextjs:nodejs /app/dist ./
 
 USER nextjs
 
@@ -73,4 +88,5 @@ EXPOSE 3000
 
 ENV PORT=3000
 
-CMD HOSTNAME=0.0.0.0 node server.js
+# server.ts binds 0.0.0.0 explicitly; PORT is read from env.
+CMD ["node", "server.js"]

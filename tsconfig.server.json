@@ -4,8 +4,10 @@
     "noEmit": false,
     "module": "commonjs",
     "target": "es2019",
-    "outDir": ".next/standalone",
-    "sourceMap": false
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": false,
+    "incremental": false
   },
   "include": ["server.ts"]
 }

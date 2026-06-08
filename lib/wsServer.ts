@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { RoomServiceClient, TokenVerifier } from 'livekit-server-sdk';
+import { RoomServiceClient } from 'livekit-server-sdk';
 
 export const subscriptionMap = new Map<string, Set<WebSocket>>();
 
@@ -9,38 +9,19 @@ function getRoomClient(): RoomServiceClient {
   return new RoomServiceClient(url.origin, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET);
 }
 
-async function authorizeRoomAccess(token: string, roomName: string): Promise<boolean> {
-  const verifier = new TokenVerifier(process.env.LIVEKIT_API_KEY!, process.env.LIVEKIT_API_SECRET!);
-  let claims: Awaited<ReturnType<TokenVerifier['verify']>>;
-  try {
-    claims = await verifier.verify(token);
-  } catch {
-    return false;
-  }
-  const grant = claims.video;
-  return !!(grant && grant.roomJoin === true && grant.room === roomName);
-}
-
 export function handleNewConnection(ws: WebSocket): void {
   ws.on('message', async (data) => {
-    let msg: { action?: string; roomName?: string; token?: string };
+    let msg: { action?: string; roomName?: string };
     try {
       msg = JSON.parse(data.toString());
     } catch {
       return;
     }
 
-    const { action, roomName, token } = msg;
+    const { action, roomName } = msg;
     if (!action || !roomName) return;
 
     if (action === 'subscribe') {
-      if (!token || !(await authorizeRoomAccess(token, roomName))) {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'error', message: 'Unauthorized' }));
-        }
-        return;
-      }
-
       if (!subscriptionMap.has(roomName)) {
         subscriptionMap.set(roomName, new Set());
       }

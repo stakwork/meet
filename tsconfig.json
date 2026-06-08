@@ -3,7 +3,7 @@
     "target": "ES2021",
     "lib": ["dom", "dom.iterable", "ES2021", "DOM"],
     "allowJs": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,

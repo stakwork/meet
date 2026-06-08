@@ -10,12 +10,6 @@ jest.mock('livekit-server-sdk', () => {
         { name: 'Bob', metadata: '{}' },
       ]),
     })),
-    TokenVerifier: jest.fn().mockImplementation(() => ({
-      verify: jest.fn().mockResolvedValue({
-        video: { roomJoin: true, room: 'room1' },
-        sub: 'user1',
-      }),
-    })),
   };
 });
 
@@ -53,7 +47,7 @@ describe('handleNewConnection - subscribe', () => {
     const messageListener = getListener(ws, 'message');
     expect(messageListener).toBeDefined();
 
-    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room1', token: 'valid-token' })));
+    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room1' })));
 
     // Wait for async listParticipants
     await new Promise((r) => setTimeout(r, 20));
@@ -70,55 +64,16 @@ describe('handleNewConnection - subscribe', () => {
     expect(sent.participants[1]).toEqual({ nickname: 'Bob', avatarUrl: '' });
   });
 
-  it('rejects subscribe with no token and sends Unauthorized', async () => {
-    const ws = mockWs();
-    handleNewConnection(ws);
-    const messageListener = getListener(ws, 'message');
-
-    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room1' })));
-    await new Promise((r) => setTimeout(r, 20));
-
-    expect(subscriptionMap.has('room1')).toBe(false);
-    const sent = JSON.parse((ws.send as jest.Mock).mock.calls[0][0]);
-    expect(sent.type).toBe('error');
-    expect(sent.message).toBe('Unauthorized');
-  });
-
-  it('rejects subscribe when token is for a different room', async () => {
-    const { TokenVerifier } = jest.requireMock('livekit-server-sdk');
-    TokenVerifier.mockImplementationOnce(() => ({
-      verify: jest.fn().mockResolvedValue({
-        video: { roomJoin: true, room: 'other-room' },
-        sub: 'user1',
-      }),
-    }));
-
-    const ws = mockWs();
-    handleNewConnection(ws);
-    const messageListener = getListener(ws, 'message');
-
-    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room1', token: 'wrong-room-token' })));
-    await new Promise((r) => setTimeout(r, 20));
-
-    expect(subscriptionMap.has('room1')).toBe(false);
-    const sent = JSON.parse((ws.send as jest.Mock).mock.calls[0][0]);
-    expect(sent.type).toBe('error');
-  });
 });
 
 describe('handleNewConnection - unsubscribe', () => {
   it('removes ws from subscriptionMap', async () => {
-    const { TokenVerifier } = jest.requireMock('livekit-server-sdk');
-    TokenVerifier.mockImplementationOnce(() => ({
-      verify: jest.fn().mockResolvedValue({ video: { roomJoin: true, room: 'room2' }, sub: 'u1' }),
-    }));
-
     const ws = mockWs();
     handleNewConnection(ws);
     const messageListener = getListener(ws, 'message');
 
     // Subscribe first
-    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room2', token: 'valid-token' })));
+    await messageListener!(Buffer.from(JSON.stringify({ action: 'subscribe', roomName: 'room2' })));
     await new Promise((r) => setTimeout(r, 20));
     expect(subscriptionMap.get('room2')!.has(ws)).toBe(true);
 

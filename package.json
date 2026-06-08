@@ -27,7 +27,8 @@
     "react-dom": "18.3.1",
     "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.1.0",
-    "tinykeys": "^2.1.0"
+    "tinykeys": "^2.1.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -40,8 +41,7 @@
     "jest": "^30.4.2",
     "source-map-loader": "^5.0.0",
     "ts-jest": "^29.4.11",
-    "typescript": "5.7.2",
-    "ws": "^8.21.0"
+    "typescript": "5.7.2"
   },
   "engines": {
     "node": ">=18"

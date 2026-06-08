@@ -60,6 +60,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# The custom server (server.js, compiled from server.ts) requires 'ws' at runtime.
+# Next's standalone output bundles 'ws' into the API route chunk and does not emit
+# it as a standalone module, so copy it explicitly for the custom server. ('ws' has
+# no runtime dependencies of its own.)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/ws ./node_modules/ws
+
 
 USER nextjs
 

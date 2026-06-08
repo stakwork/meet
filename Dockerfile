@@ -42,6 +42,7 @@ COPY assetlinks.json public/.well-known/assetlinks.json
 COPY apple-app-site-association public/.well-known/apple-app-site-association
 
 RUN npm run build
+RUN npx tsc --project tsconfig.server.json
 
 # 3. Production image, copy all the files and run next
 FROM base AS runner

@@ -1,4 +1,4 @@
-export const runtime = 'nodejs'; // REQUIRED — ensures module cache is shared with server.ts
+export const runtime = 'nodejs'; // REQUIRED — prevents Edge runtime; subscriptionMap sharing is handled via global in lib/wsServer.ts
 
 import { WebhookReceiver } from 'livekit-server-sdk';
 import { broadcastToRoom, subscriptionMap } from '@/lib/wsServer';

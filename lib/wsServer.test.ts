@@ -146,6 +146,15 @@ describe('handleNewConnection - socket close', () => {
   });
 });
 
+describe('subscriptionMap singleton', () => {
+  it('resolves to the same global reference on re-import', async () => {
+    const { subscriptionMap: reimported } = await import('./wsServer');
+    expect(reimported).toBe(subscriptionMap);
+    // Also verify the global anchor is set
+    expect(global.__wsSubscriptionMap).toBe(subscriptionMap);
+  });
+});
+
 describe('broadcastToRoom', () => {
   it('sends to all OPEN sockets', () => {
     const ws1 = mockWs(WebSocket.OPEN);

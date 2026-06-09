@@ -42,6 +42,7 @@ export function handleNewConnection(ws: WebSocket): void {
           type: 'current_participants',
           roomName,
           participants: participants.map((p) => ({
+            identity: p.identity,
             nickname: p.name,
             avatarUrl: safeParseMetadata(p.metadata)?.avatarUrl ?? '',
           })),

@@ -36,10 +36,11 @@ export function SettingsMenu(props: SettingsMenuProps) {
   const { microphoneTrack } = useLocalParticipant();
 
   const [activeTab, setActiveTab] = React.useState(tabs[0]);
-  const [isNoiseFilterEnabled, setIsNoiseFilterEnabled] = React.useState(true);
+  const [isNoiseFilterEnabled, setIsNoiseFilterEnabled] = React.useState(false);
   const [isNoiseFilterPending, setIsNoiseFilterPending] = React.useState(false);
 
   React.useEffect(() => {
+    let cancelled = false;
     const micPublication = microphoneTrack;
     if (micPublication && micPublication.track instanceof LocalAudioTrack) {
       const currentProcessor = micPublication.track.getProcessor();
@@ -47,25 +48,32 @@ export function SettingsMenu(props: SettingsMenuProps) {
         setIsNoiseFilterPending(true);
         (currentProcessor as KrispNoiseFilterProcessor)
           .setEnabled(isNoiseFilterEnabled)
-          .finally(() => setIsNoiseFilterPending(false));
+          .finally(() => { if (!cancelled) setIsNoiseFilterPending(false); });
       } else if (!currentProcessor && isNoiseFilterEnabled) {
         setIsNoiseFilterPending(true);
         import('@livekit/krisp-noise-filter')
           .then(({ KrispNoiseFilter, isKrispNoiseFilterSupported }) => {
+            if (cancelled) return;
             if (!isKrispNoiseFilterSupported()) {
               console.error('Enhanced noise filter is not supported for this browser');
               setIsNoiseFilterEnabled(false);
               return;
             }
-            micPublication?.track
-              // @ts-ignore
-              ?.setProcessor(KrispNoiseFilter())
-              .then(() => console.log('successfully set noise filter'));
+            const currentTrack = micPublication?.track;
+            if (!currentTrack || !(currentTrack instanceof LocalAudioTrack)) return;
+            currentTrack
+              .setProcessor(KrispNoiseFilter())
+              .then(() => console.log('successfully set noise filter'))
+              .catch((e) => {
+                console.error('Failed to apply noise filter to track', e);
+                if (!cancelled) setIsNoiseFilterEnabled(false);
+              });
           })
           .catch((e) => console.error('Failed to load noise filter', e))
-          .finally(() => setIsNoiseFilterPending(false));
+          .finally(() => { if (!cancelled) setIsNoiseFilterPending(false); });
       }
     }
+    return () => { cancelled = true; };
   }, [isNoiseFilterEnabled, microphoneTrack]);
 
   if (!props.showSettings) return null;

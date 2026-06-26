@@ -36,6 +36,16 @@ export async function GET(request: NextRequest) {
       metadata = JSON.stringify({ ...existing, hiveToken });
     }
 
+    // If a callKey is provided, embed it in participant metadata so the voice
+    // agent can exchange it for a hiveToken server-side (see sphinx-voice
+    // getMcpServersFromMetadata). The callKey is a short opaque key minted by
+    // the Hive generate-link endpoint and carried in the call URL.
+    const callKey = request.nextUrl.searchParams.get('callKey');
+    if (callKey) {
+      const existing = metadata ? JSON.parse(metadata) : {};
+      metadata = JSON.stringify({ ...existing, callKey });
+    }
+
     // Generate participant token
     const participantToken = await createParticipantToken(
       {

@@ -1,5 +1,6 @@
 import { GET } from './route';
 import { NextRequest } from 'next/server';
+import { AccessToken } from 'livekit-server-sdk';
 
 const mockToJwt = jest.fn();
 const mockAddGrant = jest.fn();
@@ -17,6 +18,16 @@ function capturedGrant(): Record<string, unknown> {
   return mockAddGrant.mock.calls[0][0];
 }
 
+// Capture the AccessTokenOptions (userInfo) passed to the AccessToken constructor
+function capturedTokenOptions(): { metadata?: string } {
+  return (AccessToken as unknown as jest.Mock).mock.calls[0][2];
+}
+
+function capturedMetadata(): Record<string, unknown> {
+  const meta = capturedTokenOptions().metadata;
+  return meta ? JSON.parse(meta) : {};
+}
+
 beforeAll(() => {
   process.env.LIVEKIT_URL = 'wss://test.livekit.io';
   process.env.LIVEKIT_API_KEY = 'test-key';
@@ -27,6 +38,7 @@ beforeEach(() => {
   mockAddGrant.mockReset();
   mockToJwt.mockReset();
   mockToJwt.mockResolvedValue('mock-token');
+  (AccessToken as unknown as jest.Mock).mockClear();
 });
 
 function makeRequest(params: Record<string, string>) {
@@ -87,5 +99,36 @@ describe('GET /api/connection-details', () => {
     const req = makeRequest({ roomName: 'room-1', participantName: 'alice', isHost: 'yes' });
     await GET(req);
     expect(capturedGrant().roomAdmin).toBeFalsy();
+  });
+
+  it('embeds callKey in participant metadata', async () => {
+    const req = makeRequest({ roomName: 'room-1', participantName: 'alice', callKey: 'key-abc' });
+    await GET(req);
+    expect(capturedMetadata().callKey).toBe('key-abc');
+  });
+
+  it('embeds hiveToken in participant metadata', async () => {
+    const req = makeRequest({ roomName: 'room-1', participantName: 'alice', hiveToken: 'tok-xyz' });
+    await GET(req);
+    expect(capturedMetadata().hiveToken).toBe('tok-xyz');
+  });
+
+  it('merges callKey with existing metadata', async () => {
+    const req = makeRequest({
+      roomName: 'room-1',
+      participantName: 'alice',
+      metadata: JSON.stringify({ profilePictureUrl: 'http://example.com/a.png' }),
+      callKey: 'key-abc',
+    });
+    await GET(req);
+    const meta = capturedMetadata();
+    expect(meta.callKey).toBe('key-abc');
+    expect(meta.profilePictureUrl).toBe('http://example.com/a.png');
+  });
+
+  it('omits callKey from metadata when not provided', async () => {
+    const req = makeRequest({ roomName: 'room-1', participantName: 'alice' });
+    await GET(req);
+    expect(capturedMetadata().callKey).toBeUndefined();
   });
 });

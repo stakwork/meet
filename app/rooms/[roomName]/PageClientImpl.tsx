@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 import '../../../styles/PageClientImpl.css';
 import { CustomVideoLayoutContextProvider } from '@/app/custom/layout/LayoutContextProvider';
 import CustomVideoLayout from '@/app/custom/layout/CustomVideoLayout';
-import Transcript from '@/lib/Transcript';
+import Transcript, { type AccumulatedSegment } from '@/lib/Transcript';
 
 const CONN_DETAILS_ENDPOINT =
   process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT || '/api/connection-details';
@@ -178,7 +178,8 @@ function VideoConferenceComponent(props: {
   const router = useRouter();
   const handleOnLeave = () => router.push('/');
 
-  const [latestText, setLatestText] = useState('');
+  const [transcriptions, setTranscriptions] = useState<{ [id: string]: AccumulatedSegment }>({});
+  const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -188,12 +189,26 @@ function VideoConferenceComponent(props: {
       segments: TranscriptionSegment[],
       participant?: Participant,
     ) => {
-      if (segments.length > 0) {
-        const name = participant?.name || participant?.identity || '';
-        const prefix = name ? `${name}: ` : '';
-        setLatestText(`${prefix}${segments[0].text}`);
+      if (segments.length === 0) return;
+      const participantName = participant?.name || participant?.identity || '';
+      setTranscriptions((prev) => {
+        const next = { ...prev };
+        for (const segment of segments) {
+          next[segment.id] = { segment, participantName };
+        }
+        // Prune to the 50 most recent entries to bound memory on long calls
+        const entries = Object.entries(next).sort(
+          ([, a], [, b]) => a.segment.startTime - b.segment.startTime,
+        );
+        return Object.fromEntries(entries.slice(-50));
+      });
+      // Only auto-hide when collapsed -- don't yank the panel away while the user is reviewing expanded history
+      if (!transcriptExpanded) {
         if (hideTimer.current) clearTimeout(hideTimer.current);
-        hideTimer.current = setTimeout(() => setLatestText(''), 4400);
+        hideTimer.current = setTimeout(() => setTranscriptions({}), 4400);
+      } else if (hideTimer.current) {
+        clearTimeout(hideTimer.current);
+        hideTimer.current = null;
       }
     };
 
@@ -202,7 +217,15 @@ function VideoConferenceComponent(props: {
       room.off(RoomEvent.TranscriptionReceived, updateTranscriptions);
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
-  }, [room]);
+  }, [room, transcriptExpanded]);
+
+  const sortedSegments = useMemo(
+    () =>
+      Object.values(transcriptions).sort(
+        (a, b) => a.segment.startTime - b.segment.startTime,
+      ),
+    [transcriptions],
+  );
 
   if (!isClient) return null;
 
@@ -220,7 +243,11 @@ function VideoConferenceComponent(props: {
         <CustomVideoLayout />
         <RoomAudioRenderer />
       </CustomVideoLayoutContextProvider>
-      <Transcript latestText={latestText} />
+      <Transcript
+        segments={sortedSegments}
+        expanded={transcriptExpanded}
+        onToggle={() => setTranscriptExpanded((prev) => !prev)}
+      />
     </LiveKitRoom>
   );
 }

@@ -12,8 +12,6 @@ export default function Page({
     region?: string;
     hq?: string;
     codec?: string;
-    hiveToken?: string;
-    callKey?: string;
   };
 }) {
   const codec =
@@ -23,6 +21,6 @@ export default function Page({
   const hq = searchParams.hq === 'true' ? true : false;
 
   return (
-    <PageClientImpl roomName={params.roomName} region={searchParams.region} hq={hq} codec={codec} hiveToken={searchParams.hiveToken} callKey={searchParams.callKey} />
+    <PageClientImpl roomName={params.roomName} region={searchParams.region} hq={hq} codec={codec} />
   );
 }

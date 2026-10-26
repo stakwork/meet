@@ -4,13 +4,22 @@ import { AccessToken } from 'livekit-server-sdk';
 
 const mockToJwt = jest.fn();
 const mockAddGrant = jest.fn();
+/** Every token the route built, to read what it set on them (roomConfig). */
+const mockTokens: Array<{
+  toJwt: jest.Mock;
+  roomConfig?: { agents: Array<{ agentName: string; metadata: string }> };
+}> = [];
 
 jest.mock('livekit-server-sdk', () => ({
-  AccessToken: jest.fn().mockImplementation(() => ({
-    addGrant: mockAddGrant,
-    toJwt: mockToJwt,
-    set ttl(_: string) {},
-  })),
+  AccessToken: jest.fn().mockImplementation(() => {
+    const token = {
+      addGrant: mockAddGrant,
+      toJwt: mockToJwt,
+      set ttl(_: string) {},
+    };
+    mockTokens.push(token);
+    return token;
+  }),
 }));
 
 // Capture the grant passed to addGrant
@@ -35,6 +44,8 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  mockTokens.length = 0;
+  delete process.env.LIVEKIT_AGENT_NAME;
   mockAddGrant.mockReset();
   mockToJwt.mockReset();
   mockToJwt.mockResolvedValue('mock-token');
@@ -101,34 +112,39 @@ describe('GET /api/connection-details', () => {
     expect(capturedGrant().roomAdmin).toBeFalsy();
   });
 
-  it('embeds callKey in participant metadata', async () => {
-    const req = makeRequest({ roomName: 'room-1', participantName: 'alice', callKey: 'key-abc' });
-    await GET(req);
-    expect(capturedMetadata().callKey).toBe('key-abc');
-  });
-
-  it('embeds hiveToken in participant metadata', async () => {
-    const req = makeRequest({ roomName: 'room-1', participantName: 'alice', hiveToken: 'tok-xyz' });
-    await GET(req);
-    expect(capturedMetadata().hiveToken).toBe('tok-xyz');
-  });
-
-  it('merges callKey with existing metadata', async () => {
+  it('never puts a callKey or hiveToken in participant metadata', async () => {
+    // Every participant can read participant metadata.
     const req = makeRequest({
       roomName: 'room-1',
       participantName: 'alice',
-      metadata: JSON.stringify({ profilePictureUrl: 'http://example.com/a.png' }),
       callKey: 'key-abc',
+      hiveToken: 'tok-xyz',
     });
     await GET(req);
-    const meta = capturedMetadata();
-    expect(meta.callKey).toBe('key-abc');
-    expect(meta.profilePictureUrl).toBe('http://example.com/a.png');
+    expect(capturedMetadata().callKey).toBeUndefined();
+    expect(capturedMetadata().hiveToken).toBeUndefined();
   });
 
-  it('omits callKey from metadata when not provided', async () => {
+  it('passes caller metadata through unchanged', async () => {
+    const metadata = JSON.stringify({ profilePictureUrl: 'http://example.com/a.png' });
+    const req = makeRequest({ roomName: 'room-1', participantName: 'alice', metadata });
+    await GET(req);
+    expect(capturedTokenOptions().metadata).toBe(metadata);
+  });
+
+  it('dispatches Jamie, without metadata, into a room the token creates', async () => {
     const req = makeRequest({ roomName: 'room-1', participantName: 'alice' });
     await GET(req);
-    expect(capturedMetadata().callKey).toBeUndefined();
+    const agents = mockTokens[0]?.roomConfig?.agents ?? [];
+    expect(agents).toHaveLength(1);
+    expect(agents[0].agentName).toBe('jamie');
+    expect(agents[0].metadata).toBe('');
+  });
+
+  it('dispatches the agent named by LIVEKIT_AGENT_NAME', async () => {
+    process.env.LIVEKIT_AGENT_NAME = 'jamie-dev';
+    const req = makeRequest({ roomName: 'room-1', participantName: 'alice' });
+    await GET(req);
+    expect(mockTokens[0]?.roomConfig?.agents[0].agentName).toBe('jamie-dev');
   });
 });

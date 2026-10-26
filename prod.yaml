@@ -33,6 +33,8 @@ services:
       - S3_ENDPOINT=${S3_ENDPOINT}
       - RUNNER_URL=${RUNNER_URL}
       - RUNNER_SECRET=${RUNNER_SECRET}
+      # The agent a room this server creates dispatches (sphinx-voice's name; default jamie)
+      - LIVEKIT_AGENT_NAME=${LIVEKIT_AGENT_NAME}
     ports:
       - 3000:3000
 
@@ -50,6 +52,9 @@ services:
       - PRELIMINARY_FEATURE_INTENT=${PRELIMINARY_FEATURE_INTENT}
       - HIVE_MCP_URL=${HIVE_MCP_URL}
       - IGNORE_ROOM_PREFIX=${IGNORE_ROOM_PREFIX}
+      - LIVEKIT_AGENT_NAME=${LIVEKIT_AGENT_NAME}
+      # Jamie's key for Hive's call token exchange (Hive's VOICE_AGENT_API_KEY)
+      - VOICE_AGENT_API_KEY=${VOICE_AGENT_API_KEY}
 
 volumes:
   caddy:

@@ -35,8 +35,6 @@ export function PageClientImpl(props: {
   region?: string;
   hq: boolean;
   codec: VideoCodec;
-  hiveToken?: string;
-  callKey?: string;
 }) {
   const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(undefined);
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | undefined>(
@@ -58,12 +56,6 @@ export function PageClientImpl(props: {
     url.searchParams.append('participantName', values.username);
     if (props.region) {
       url.searchParams.append('region', props.region);
-    }
-    if (props.hiveToken) {
-      url.searchParams.append('hiveToken', props.hiveToken);
-    }
-    if (props.callKey) {
-      url.searchParams.append('callKey', props.callKey);
     }
     const connectionDetailsResp = await fetch(url.toString());
     const connectionDetailsData = await connectionDetailsResp.json();

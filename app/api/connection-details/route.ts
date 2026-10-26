@@ -1,5 +1,6 @@
 import { randomString } from '@/lib/client-utils';
 import { ConnectionDetails } from '@/lib/types';
+import { RoomAgentDispatch, RoomConfiguration } from '@livekit/protocol';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const roomName = request.nextUrl.searchParams.get('roomName');
     const participantName = request.nextUrl.searchParams.get('participantName');
-    let metadata = request.nextUrl.searchParams.get('metadata') ?? '';
+    const metadata = request.nextUrl.searchParams.get('metadata') ?? '';
     const region = request.nextUrl.searchParams.get('region');
     const livekitServerUrl = region ? getLiveKitURL(region) : LIVEKIT_URL;
     if (livekitServerUrl === undefined) {
@@ -28,23 +29,9 @@ export async function GET(request: NextRequest) {
 
     const isHost = request.nextUrl.searchParams.get('isHost') === 'true';
 
-    // If a hive token is provided, embed it in participant metadata
-    // so the voice agent can read it from any participant in the room
-    const hiveToken = request.nextUrl.searchParams.get('hiveToken');
-    if (hiveToken) {
-      const existing = metadata ? JSON.parse(metadata) : {};
-      metadata = JSON.stringify({ ...existing, hiveToken });
-    }
-
-    // If a callKey is provided, embed it in participant metadata so the voice
-    // agent can exchange it for a hiveToken server-side (see sphinx-voice
-    // getMcpServersFromMetadata). The callKey is a short opaque key minted by
-    // the Hive generate-link endpoint and carried in the call URL.
-    const callKey = request.nextUrl.searchParams.get('callKey');
-    if (callKey) {
-      const existing = metadata ? JSON.parse(metadata) : {};
-      metadata = JSON.stringify({ ...existing, callKey });
-    }
+    // No credential ever goes into participant metadata: every participant in
+    // the room can read it. Hive hands Jamie its credential through the
+    // agent's dispatch metadata instead (sphinx-voice callCredentials.ts).
 
     // Generate participant token
     const participantToken = await createParticipantToken(
@@ -79,6 +66,13 @@ function createParticipantToken(
 ) {
   const at = new AccessToken(API_KEY, API_SECRET, userInfo);
   at.ttl = '5m';
+  // Jamie (sphinx-voice) only joins rooms it is dispatched to. A room this
+  // token creates gets it transcribe-only; LiveKit applies a token's room
+  // config only when the room is created, so a room Hive already created
+  // and dispatched Jamie into (with its credential) is left as it is.
+  at.roomConfig = new RoomConfiguration({
+    agents: [new RoomAgentDispatch({ agentName: process.env.LIVEKIT_AGENT_NAME || 'jamie' })],
+  });
   const grant: VideoGrant = {
     room: roomName,
     roomJoin: true,

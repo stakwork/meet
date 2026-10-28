@@ -55,6 +55,9 @@ services:
       - LIVEKIT_AGENT_NAME=${LIVEKIT_AGENT_NAME}
       # Jamie's key for Hive's call token exchange (Hive's VOICE_AGENT_API_KEY)
       - VOICE_AGENT_API_KEY=${VOICE_AGENT_API_KEY}
+      # Wake-word follow-up timings; unset falls back to sphinx-voice's in-code defaults (3000 / 1500 ms)
+      - WAKE_FOLLOW_UP_MS=${WAKE_FOLLOW_UP_MS}
+      - WAKE_FOLLOW_UP_PAUSE_MS=${WAKE_FOLLOW_UP_PAUSE_MS}
 
 volumes:
   caddy:

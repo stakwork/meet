@@ -1,6 +1,5 @@
 import { randomString } from '@/lib/client-utils';
 import { ConnectionDetails } from '@/lib/types';
-import { RoomAgentDispatch, RoomConfiguration } from '@livekit/protocol';
 import { AccessToken, AccessTokenOptions, VideoGrant } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -66,13 +65,8 @@ function createParticipantToken(
 ) {
   const at = new AccessToken(API_KEY, API_SECRET, userInfo);
   at.ttl = '5m';
-  // Jamie (sphinx-voice) only joins rooms it is dispatched to. A room this
-  // token creates gets it transcribe-only; LiveKit applies a token's room
-  // config only when the room is created, so a room Hive already created
-  // and dispatched Jamie into (with its credential) is left as it is.
-  at.roomConfig = new RoomConfiguration({
-    agents: [new RoomAgentDispatch({ agentName: process.env.LIVEKIT_AGENT_NAME || 'jamie' })],
-  });
+  // No agent dispatch here: Jamie joins only rooms Hive dispatches him into
+  // (with the call's credential); a plain meet room gets no agent.
   const grant: VideoGrant = {
     room: roomName,
     roomJoin: true,

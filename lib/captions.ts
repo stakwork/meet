@@ -6,6 +6,8 @@
  * speaker is named from `lk.transcribed_track_id`, never from the sender.
  */
 
+import { Encryption_Type } from 'livekit-client';
+
 export const TRANSCRIPTION_TOPIC = 'lk.transcription';
 export const ATTR_FINAL = 'lk.transcription_final';
 export const ATTR_SEGMENT = 'lk.segment_id';
@@ -65,4 +67,17 @@ export function captionSpeaker(
 /** A caption line as the overlay shows it: "Name: words". */
 export function captionLine(speaker: string, text: string): string {
   return speaker ? `${speaker}: ${text}` : text;
+}
+
+/**
+ * Whether a caption stream may be shown. In a call with a key, only a stream
+ * that arrived encrypted with it: an unencrypted one could come from anyone
+ * in the room without the key, putting words in a participant's mouth.
+ */
+export function captionStreamAllowed(
+  callEncrypted: boolean,
+  encryptionType: Encryption_Type | undefined,
+): boolean {
+  if (!callEncrypted) return true;
+  return encryptionType !== undefined && encryptionType !== Encryption_Type.NONE;
 }

@@ -1,4 +1,11 @@
-import { captionLine, captionSpeaker, participantForTrack, type CaptionRoom } from './captions';
+import { Encryption_Type } from 'livekit-client';
+import {
+  captionLine,
+  captionSpeaker,
+  captionStreamAllowed,
+  participantForTrack,
+  type CaptionRoom,
+} from './captions';
 
 function participant(identity: string, name: string, tracks: string[]) {
   return { identity, name, trackPublications: new Set(tracks) };
@@ -50,5 +57,21 @@ describe('captionLine', () => {
   it('prefixes the speaker when known', () => {
     expect(captionLine('Alice', 'hello')).toBe('Alice: hello');
     expect(captionLine('', 'hello')).toBe('hello');
+  });
+});
+
+describe('captionStreamAllowed', () => {
+  it('drops an unencrypted stream in a call with a key', () => {
+    expect(captionStreamAllowed(true, Encryption_Type.NONE)).toBe(false);
+    expect(captionStreamAllowed(true, undefined)).toBe(false);
+  });
+
+  it('shows an encrypted stream in a call with a key', () => {
+    expect(captionStreamAllowed(true, Encryption_Type.GCM)).toBe(true);
+  });
+
+  it('shows every stream in a call without a key', () => {
+    expect(captionStreamAllowed(false, Encryption_Type.NONE)).toBe(true);
+    expect(captionStreamAllowed(false, undefined)).toBe(true);
   });
 });

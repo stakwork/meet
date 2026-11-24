@@ -16,6 +16,7 @@ import {
   VideoPresets,
   Room,
   DeviceUnsupportedError,
+  isE2EESupported,
   RoomConnectOptions,
   RoomEvent,
   TranscriptionSegment,
@@ -26,8 +27,18 @@ import '../../../styles/PageClientImpl.css';
 import { CustomVideoLayoutContextProvider } from '@/app/custom/layout/LayoutContextProvider';
 import CustomVideoLayout from '@/app/custom/layout/CustomVideoLayout';
 import Transcript from '@/lib/Transcript';
-import { EncryptionNotice } from '@/lib/EncryptionNotice';
-import { TRANSCRIPTION_TOPIC, captionLine, captionSpeaker } from '@/lib/captions';
+import {
+  E2EE_FAILED_MESSAGE,
+  E2EE_UNSUPPORTED_MESSAGE,
+  EncryptionNotice,
+  encryptionErrorMessage,
+} from '@/lib/EncryptionNotice';
+import {
+  TRANSCRIPTION_TOPIC,
+  captionLine,
+  captionSpeaker,
+  captionStreamAllowed,
+} from '@/lib/captions';
 
 const CONN_DETAILS_ENDPOINT =
   process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT || '/api/connection-details';
@@ -102,6 +113,7 @@ function VideoConferenceComponent(props: {
     if (typeof window === 'undefined')
       return {
         enabled: false,
+        unsupported: false,
         passphrase: undefined,
         worker: undefined,
       };
@@ -111,13 +123,18 @@ function VideoConferenceComponent(props: {
     // LiveKit's default salt, as Peel and the box key it: never hash or
     // decode it any other way.
     const e2eePassphrase = decodePassphrase(location.hash.substring(1));
-    const worker = e2eePassphrase
-      ? new Worker(new URL('livekit-client/e2ee-worker', import.meta.url))
-      : undefined;
+    // Checked before the Room exists: `new Room()` with encryption throws on a
+    // browser that can't encrypt, which would leave a blank page.
+    const unsupported = !!e2eePassphrase && !isE2EESupported();
+    const worker =
+      e2eePassphrase && !unsupported
+        ? new Worker(new URL('livekit-client/e2ee-worker', import.meta.url))
+        : undefined;
     const e2eeEnabled = !!(e2eePassphrase && worker);
 
     return {
       enabled: e2eeEnabled,
+      unsupported,
       passphrase: e2eePassphrase,
       worker,
     };
@@ -161,8 +178,10 @@ function VideoConferenceComponent(props: {
 
   // An encrypted call connects only once encryption is on; one that cannot
   // turn it on never connects, and says why.
-  const [e2eeReady, setE2eeReady] = useState(!e2eeConfig.enabled);
-  const [e2eeFatal, setE2eeFatal] = useState<string[]>([]);
+  const [e2eeReady, setE2eeReady] = useState(!e2eeConfig.enabled && !e2eeConfig.unsupported);
+  const [e2eeFatal, setE2eeFatal] = useState<string[]>(
+    e2eeConfig.unsupported ? [E2EE_UNSUPPORTED_MESSAGE] : [],
+  );
   const [e2eeNotices, setE2eeNotices] = useState<string[]>([]);
   const fatalRef = useRef(false);
 
@@ -181,9 +200,7 @@ function VideoConferenceComponent(props: {
       .catch((e) => {
         console.error(e);
         failEncryption(
-          e instanceof DeviceUnsupportedError
-            ? `Your browser does not support end-to-end encryption. Please update it to the latest version and try again.`
-            : `Encryption could not be turned on: ${e instanceof Error ? e.message : String(e)}`,
+          e instanceof DeviceUnsupportedError ? E2EE_UNSUPPORTED_MESSAGE : E2EE_FAILED_MESSAGE,
         );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,9 +218,7 @@ function VideoConferenceComponent(props: {
       console.error('encryption error', error, participant?.identity);
       const who =
         participant && !participant.isLocal ? participant.name || participant.identity : '';
-      const message = who
-        ? `Can't decrypt ${who}: they may not have this call's key. (${error.message})`
-        : `Encryption error: ${error.message}`;
+      const message = encryptionErrorMessage(who);
       setE2eeNotices((prev) => (prev.includes(message) ? prev : [...prev, message]));
     };
     room.on(RoomEvent.ParticipantEncryptionStatusChanged, onStatus);
@@ -254,6 +269,12 @@ function VideoConferenceComponent(props: {
       reader,
       { identity },
     ) => {
+      // In a call with a key, a caption that arrived in the clear could be
+      // anyone's: someone without the key could put words on screen.
+      if (!captionStreamAllowed(e2eeConfig.enabled, reader.info.encryptionType)) {
+        console.warn('dropped an unencrypted caption stream from', identity);
+        return;
+      }
       void (async () => {
         try {
           let text = '';
@@ -275,7 +296,7 @@ function VideoConferenceComponent(props: {
       room.unregisterTextStreamHandler(TRANSCRIPTION_TOPIC);
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
-  }, [room]);
+  }, [room, e2eeConfig]);
 
   if (!isClient) return null;
 

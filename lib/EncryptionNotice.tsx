@@ -5,6 +5,18 @@
  * a banner over the call, or the whole page when the call could not start
  * encrypted (meet never joins a keyed call in the clear).
  */
+/** What the person reads when encryption reports an error; LiveKit's own text goes to the console. */
+export function encryptionErrorMessage(who?: string): string {
+  return who
+    ? `Can't decrypt ${who}. They may not have this call's key.`
+    : `Something went wrong with this call's encryption.`;
+}
+
+/** What the person reads when a call with a key can't start encrypted. */
+export const E2EE_UNSUPPORTED_MESSAGE =
+  "Your browser doesn't support end-to-end encryption. Please update it to the latest version and try again.";
+export const E2EE_FAILED_MESSAGE = 'Encryption could not be turned on.';
+
 export function EncryptionNotice(props: {
   messages: string[];
   fatal?: boolean;
@@ -34,7 +46,7 @@ export function EncryptionNotice(props: {
             {m}
           </p>
         ))}
-        <p style={{ margin: 0, opacity: 0.7 }}>You were not connected without encryption.</p>
+        <p style={{ margin: 0, opacity: 0.7 }}>You were not connected.</p>
       </div>
     );
   }

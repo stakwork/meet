@@ -33,8 +33,6 @@ services:
       - S3_ENDPOINT=${S3_ENDPOINT}
       - RUNNER_URL=${RUNNER_URL}
       - RUNNER_SECRET=${RUNNER_SECRET}
-      # The agent a room this server creates dispatches (sphinx-voice's name; default jamie)
-      - LIVEKIT_AGENT_NAME=${LIVEKIT_AGENT_NAME}
     ports:
       - 3000:3000
 

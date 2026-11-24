@@ -132,19 +132,16 @@ describe('GET /api/connection-details', () => {
     expect(capturedTokenOptions().metadata).toBe(metadata);
   });
 
-  it('dispatches Jamie, without metadata, into a room the token creates', async () => {
+  it('does not dispatch an agent into a room the token creates', async () => {
     const req = makeRequest({ roomName: 'room-1', participantName: 'alice' });
     await GET(req);
-    const agents = mockTokens[0]?.roomConfig?.agents ?? [];
-    expect(agents).toHaveLength(1);
-    expect(agents[0].agentName).toBe('jamie');
-    expect(agents[0].metadata).toBe('');
+    expect(mockTokens[0]?.roomConfig?.agents ?? []).toHaveLength(0);
   });
 
-  it('dispatches the agent named by LIVEKIT_AGENT_NAME', async () => {
+  it('does not dispatch an agent even when LIVEKIT_AGENT_NAME is set', async () => {
     process.env.LIVEKIT_AGENT_NAME = 'jamie-dev';
     const req = makeRequest({ roomName: 'room-1', participantName: 'alice' });
     await GET(req);
-    expect(mockTokens[0]?.roomConfig?.agents[0].agentName).toBe('jamie-dev');
+    expect(mockTokens[0]?.roomConfig?.agents ?? []).toHaveLength(0);
   });
 });

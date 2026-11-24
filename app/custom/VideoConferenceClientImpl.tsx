@@ -15,6 +15,7 @@ import {
 import { DebugMode } from '@/lib/Debug';
 import { useMemo, useEffect, useState } from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
+import { EncryptionNotice } from '@/lib/EncryptionNotice';
 
 export function VideoConferenceClientImpl(props: {
   liveKitUrl: string;
@@ -34,11 +35,13 @@ export function VideoConferenceClientImpl(props: {
       publishDefaults: {
         videoSimulcastLayers: [VideoPresets.h540, VideoPresets.h216],
         red: !e2eeEnabled,
+        ...(e2eeEnabled ? { dtx: false } : {}),
         videoCodec: props.codec,
       },
       adaptiveStream: { pixelDensity: 'screen' },
       dynacast: true,
-      e2ee: e2eeEnabled
+      // `encryption`, not the deprecated `e2ee`: it encrypts the data channel too.
+      encryption: e2eeEnabled
         ? {
             keyProvider,
             worker,
@@ -48,10 +51,23 @@ export function VideoConferenceClientImpl(props: {
   }, []);
 
   const room = useMemo(() => new Room(roomOptions), []);
-  if (e2eeEnabled) {
+  // An encrypted room connects only once encryption is on, never in the clear.
+  const [e2eeReady, setE2eeReady] = useState(!e2eeEnabled);
+  const [e2eeError, setE2eeError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!e2eeEnabled) return;
     keyProvider.setKey(e2eePassphrase);
-    room.setE2EEEnabled(true);
-  }
+    room
+      .setE2EEEnabled(true)
+      .then(() => setE2eeReady(true))
+      .catch((e) => {
+        console.error(e);
+        setE2eeError(
+          `Encryption could not be turned on: ${e instanceof Error ? e.message : String(e)}`,
+        );
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room]);
   const connectOptions = useMemo((): RoomConnectOptions => {
     return {
       autoSubscribe: true,
@@ -81,10 +97,13 @@ export function VideoConferenceClientImpl(props: {
     };
   }, [room]);
 
+  if (e2eeError) return <EncryptionNotice messages={[e2eeError]} fatal />;
+
   return (
     <LiveKitRoom
       room={room}
       token={props.token}
+      connect={e2eeReady}
       connectOptions={connectOptions}
       serverUrl={props.liveKitUrl}
       audio={true}

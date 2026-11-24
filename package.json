@@ -19,7 +19,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "livekit-client": "^2.8.1",
+    "livekit-client": "2.16.0",
     "livekit-server-sdk": "2.9.7",
     "lucide-react": "^0.487.0",
     "material-symbols": "^0.28.2",

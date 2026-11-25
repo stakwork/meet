@@ -1,6 +1,7 @@
 import { Encryption_Type } from 'livekit-client';
 import {
   captionLine,
+  captionPacketAllowed,
   captionSpeaker,
   captionStreamAllowed,
   participantForTrack,
@@ -73,5 +74,15 @@ describe('captionStreamAllowed', () => {
   it('shows every stream in a call without a key', () => {
     expect(captionStreamAllowed(false, Encryption_Type.NONE)).toBe(true);
     expect(captionStreamAllowed(false, undefined)).toBe(true);
+  });
+});
+
+describe('captionPacketAllowed', () => {
+  it('ignores the unencrypted transcription packet in a call with a key', () => {
+    expect(captionPacketAllowed(true)).toBe(false);
+  });
+
+  it("shows it in a call without a key, as Hive's calls send it", () => {
+    expect(captionPacketAllowed(false)).toBe(true);
   });
 });

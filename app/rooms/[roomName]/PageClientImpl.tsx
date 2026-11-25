@@ -36,6 +36,7 @@ import {
 import {
   TRANSCRIPTION_TOPIC,
   captionLine,
+  captionPacketAllowed,
   captionSpeaker,
   captionStreamAllowed,
 } from '@/lib/captions';
@@ -253,8 +254,11 @@ function VideoConferenceComponent(props: {
       hideTimer.current = setTimeout(() => setLatestText(''), 4400);
     };
 
-    // Hive's calls: LiveKit's old transcription packet.
+    // Hive's calls: LiveKit's old transcription packet. It is never
+    // encrypted, so a call with a key ignores it (anyone without the key could
+    // send one) and shows only the encrypted text streams below.
     const updateTranscriptions = (segments: TranscriptionSegment[], participant?: Participant) => {
+      if (!captionPacketAllowed(e2eeConfig.enabled)) return;
       if (segments.length > 0) {
         const name = participant?.name || participant?.identity || '';
         const prefix = name ? `${name}: ` : '';

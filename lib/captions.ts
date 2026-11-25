@@ -81,3 +81,13 @@ export function captionStreamAllowed(
   if (!callEncrypted) return true;
   return encryptionType !== undefined && encryptionType !== Encryption_Type.NONE;
 }
+
+/**
+ * Whether a Hive-style transcription packet (`TranscriptionReceived`) may be
+ * shown. LiveKit never encrypts that packet, so in a call with a key anyone
+ * in the room without the key could send one: those calls show only
+ * encrypted `lk.transcription` streams. Calls without a key (Hive's) show it.
+ */
+export function captionPacketAllowed(callEncrypted: boolean): boolean {
+  return !callEncrypted;
+}
